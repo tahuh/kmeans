@@ -205,6 +205,7 @@ void kmeans_assign_labels(kmeans_t *sol, double **data)
     memset(distances, 0.0, sizeof(double) * K);
     for(n = 0; n < N; n++)
     {
+        xn = data[n];
         for(k = 0; k < K; k++)
         {
             dist = kmeans_distance(xn, sol->centers_[k], dim);
