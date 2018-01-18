@@ -34,7 +34,7 @@ void kmeans_multiply_constant(double *src, double *dst, double c, size_t n);
 void kmeans_estep(kmeans_t *sol, double **data);
 void kmeans_mstep(kmeans_t *sol, double **data);
 void kmeans_EM(kmeans_t *sol, double **data);
-void kmeans_assign_labels(kmeans_t *sol, double **data);
+void kmeans_assign_label(kmeans_t *sol, double **data);
 double **kmeans_show_solution(kmeans_t *sol);
 unsigned int *kmeans_show_labels(kmeans_t *sol);
 // Helper
