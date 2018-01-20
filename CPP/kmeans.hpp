@@ -1,8 +1,12 @@
 #ifndef _KMEANS_CPP_
 #define _KMEANS_CPP_
 
+#ifndef _KMEANS_CPP_
+#define _KMEANS_CPP_
+
 #include <vector>
 #include <cstdlib>
+#include <cstring>
 #include <limits.h>
 #include <float.h>
 #include <iterator>
@@ -33,11 +37,18 @@ public:
         iter= iter_;
         labels = new unsigned int[k];
         std::memset(labels, 0, sizeof(unsigned int) * k);
+        rnks = (unsigned int **)malloc(sizeof(unsigned int *) * N);
+        for(int i = 0; i < N; i++)
+        {
+            rnks[i] = (unsigned int *)malloc(sizeof(unsigned int) * k);
+        }
+        /*
         rnks = new unsigned int*[N];
         for(int i = 0; i < N; i++)
         {
             rnks[i] = new unsigned int[k];
         }
+        */
     }
     ~KMeans()
     {
@@ -46,11 +57,12 @@ public:
             delete[] solution[i];
         }
         delete[] solution;
+
         for(int i = 0; i < N; i++)
         {
-            delete[] rnks[i];
+            free( rnks[i] );
         }
-        delete[] rnks;
+        free(rnks);
         delete[] labels;
     }
     double **show_solution()
@@ -81,14 +93,22 @@ public:
     }
     std::vector<unsigned int> sample_initial()
     {
-        std::vector<unsigned int> target;
+        // Using resorvior sampling
+        int i =0; int j;
         std::vector<unsigned int> ret;
-        for(int i = 0; i < N; i++)
+        for(i = 0; i <k ; i++)
         {
-            target.push_back(i);
+            ret.push_back(i);
         }
-        std::sample(target.begin(), taget.end(), std::back_inserter(ret),
-                    k, std::mt19937{std::random_device{}()});
+        srand(0);
+        for(;i<N; i++)
+        {
+            j = rand() %(i+1);
+            if(j < k)
+            {
+                ret[j] = i;
+            }
+        }
         return ret;
     }
     double* vec2arr(std::vector<double> &v)
@@ -113,17 +133,17 @@ public:
     }
     unsigned int argmin(double *x, int n)
     {
-        unsigned int x = UINT_MAX;
+        unsigned int xx = UINT_MAX;
         double max = DBL_MAX;
         for(unsigned int i = 0; i < static_cast<unsigned int>(n); i++)
         {
             if(max > x[i])
             {
                 max = x[i];
-                x = i;
+                xx = i;
             }
         }
-        return x;
+        return xx;
     }
     void Estep(double **data)
     {
@@ -139,7 +159,7 @@ public:
                     distances.push_back(dist);
                 }
                 unsigned int am = argmin(distances.data(), k);
-                if(am == static_cast<unsigned int>(k))
+                if(am == static_cast<unsigned int>(k_))
                 {
                     rnks[n][k_] = 1;
                 }
@@ -159,9 +179,9 @@ public:
             std::vector<double> uk;
             for(int n = 0; n < N; n++)
             {
-                rnk_sum += (double)rnk[n][k_];
+                rnk_sum += (double)rnks[n][k_];
                 double *xn = data[n];
-                std::vector<double> rnk_xn_v = multiply_constant(xn, rnk[n][k_], dim);
+                std::vector<double> rnk_xn_v = multiply_constant(xn, rnks[n][k_], dim);
                 //double *rnk_xn = vec2arr(rnk_xn_v);
                 if(uk.size() == 0)
                 {
